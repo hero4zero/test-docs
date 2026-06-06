@@ -1,0 +1,38 @@
+[
+  {
+    "title": "مقدمة",
+    "path": "docs/introduction.md",
+    "section": "البداية",
+    "icon": "🚀"
+  },
+  {
+    "title": "التثبيت والإعداد",
+    "path": "docs/installation.md",
+    "section": "البداية",
+    "icon": "⚙️"
+  },
+  {
+    "title": "أداة ترميز البيانات",
+    "path": "docs/data-labeling.md",
+    "section": "الأدوات",
+    "icon": "🏷️"
+  },
+  {
+    "title": "واجهة التعرف على النصوص",
+    "path": "docs/text-recognition-api.md",
+    "section": "الأدوات",
+    "icon": "📝"
+  },
+  {
+    "title": "خدمة تقييم الموذل",
+    "path": "docs/model-evaluation.md",
+    "section": "الأدوات",
+    "icon": "📊"
+  },
+  {
+    "title": "مرجع API الكامل",
+    "path": "docs/api-reference.md",
+    "section": "المرجع",
+    "icon": "📖"
+  }
+]

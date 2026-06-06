@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مركز التوثيق</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Marked.js - Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Highlight.js - Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-base:       #0d1117;
+      --bg-surface:    #161b22;
+      --bg-card:       #1c2330;
+      --bg-hover:      #21262d;
+      --border:        #30363d;
+      --border-accent: #238636;
+      --accent:        #3fb950;
+      --accent-soft:   #1a3a24;
+      --accent-glow:   rgba(63, 185, 80, 0.15);
+      --text-primary:  #e6edf3;
+      --text-secondary:#8b949e;
+      --text-muted:    #484f58;
+      --blue:          #58a6ff;
+      --orange:        #f0883e;
+      --purple:        #bc8cff;
+      --red:           #ff7b72;
+      --sidebar-w:     280px;
+      --topbar-h:      56px;
+      --radius:        8px;
+      --transition:    0.18s ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== TOPBAR ===== */
+    #topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--topbar-h);
+      background: rgba(13, 17, 23, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #238636, #3fb950);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .github-config-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .github-config-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--accent);
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: var(--transition);
+    }
+    .status-dot.connected { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+    /* ===== LAYOUT ===== */
+    #layout {
+      display: flex;
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    #sidebar {
+      width: var(--sidebar-w);
+      min-height: calc(100vh - var(--topbar-h));
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border);
+      position: fixed;
+      top: var(--topbar-h);
+      right: 0;
+      bottom: 0;
+      overflow-y: auto;
+      padding: 16px 0;
+      transition: transform 0.25s ease;
+    }
+
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 0 16px 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 16px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-right: 2px solid transparent;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .sidebar-item:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .sidebar-item.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-right-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .sidebar-item .item-icon { font-size: 14px; flex-shrink: 0; }
+
+    .sidebar-empty {
+      padding: 20px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    #main {
+      flex: 1;
+      margin-right: var(--sidebar-w);
+      min-height: calc(100vh - var(--topbar-h));
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== WELCOME SCREEN ===== */
+    #welcome-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .welcome-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .welcome-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .welcome-sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 400px;
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .setup-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      max-width: 480px;
+      width: 100%;
+      text-align: right;
+    }
+
+    .setup-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: var(--text-primary);
+    }
+
+    .setup-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .step-num {
+      width: 22px; height: 22px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .setup-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .setup-btn:hover { background: #4fc862; transform: translateY(-1px); }
+
+    /* ===== DOC VIEW ===== */
+    #doc-view {
+      display: none;
+      padding: 0;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .doc-header {
+      padding: 32px 48px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .doc-breadcrumb {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .doc-breadcrumb span { color: var(--text-secondary); }
+
+    .doc-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .doc-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .doc-meta a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .doc-meta a:hover { text-decoration: underline; }
+
+    /* ===== MARKDOWN CONTENT ===== */
+    #doc-body {
+      padding: 36px 48px 60px;
+      max-width: 860px;
+    }
+
+    /* Headings */
+    #doc-body h1, #doc-body h2, #doc-body h3,
+    #doc-body h4, #doc-body h5, #doc-body h6 {
+      font-weight: 600;
+      line-height: 1.3;
+      margin-top: 28px;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+    }
+
+    #doc-body h1 { font-size: 24px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    #doc-body h2 { font-size: 20px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    #doc-body h3 { font-size: 17px; }
+
+    /* Paragraphs */
+    #doc-body p {
+      font-size: 14.5px;
+      line-height: 1.85;
+      color: #c9d1d9;
+      margin-bottom: 16px;
+    }
+
+    /* Inline code */
+    #doc-body code:not(pre code) {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      color: var(--orange);
+    }
+
+    /* Code blocks */
+    #doc-body pre {
+      background: #0d1117 !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
+      margin: 20px 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .code-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .code-lang {
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .copy-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--accent);
+    }
+
+    .copy-btn.copied {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    #doc-body pre code {
+      display: block;
+      padding: 18px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-x: auto;
+      background: transparent !important;
+    }
+
+    /* Lists */
+    #doc-body ul, #doc-body ol {
+      padding-right: 24px;
+      margin-bottom: 16px;
+      font-size: 14.5px;
+      line-height: 1.85;
+      color: #c9d1d9;
+    }
+
+    #doc-body li { margin-bottom: 6px; }
+
+    /* Blockquote */
+    #doc-body blockquote {
+      border-right: 3px solid var(--accent);
+      padding: 12px 18px;
+      background: var(--accent-soft);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 20px 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* Tables */
+    #doc-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 13.5px;
+    }
+
+    #doc-body th {
+      background: var(--bg-card);
+      padding: 10px 14px;
+      text-align: right;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    #doc-body td {
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    #doc-body tr:nth-child(even) td { background: var(--bg-surface); }
+    #doc-body tr:hover td { background: var(--bg-hover); }
+
+    /* Links */
+    #doc-body a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+    #doc-body a:hover { text-decoration: underline; }
+
+    /* HR */
+    #doc-body hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* ===== LOADING ===== */
+    #loading-screen {
+      display: none;
+      flex: 1;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== ERROR ===== */
+    .error-banner {
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin: 32px 48px;
+      font-size: 13.5px;
+      color: #ff7b72;
+      display: none;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 440px;
+      max-width: 95vw;
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+      line-height: 1.6;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin-bottom: 14px;
+      outline: none;
+      transition: var(--transition);
+      direction: ltr;
+      text-align: left;
+    }
+
+    .field-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: -10px;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 9px 16px;
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover { background: #4fc862; }
+
+    .btn-secondary {
+      padding: 9px 16px;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 240px; }
+      #doc-body { padding: 24px 24px 48px; }
+      .doc-header { padding: 24px 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== TOPBAR ===== -->
+<header id="topbar">
+  <a class="topbar-brand" href="#">
+    <div class="brand-icon">📚</div>
+    <span id="site-title">مركز التوثيق</span>
+  </a>
+  <div class="topbar-right">
+    <button class="github-config-btn" onclick="openModal()">
+      <div class="status-dot" id="status-dot"></div>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      <span id="config-btn-text">ربط GitHub</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== LAYOUT ===== -->
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div id="sidebar-content">
+      <div class="sidebar-empty">
+        <div style="font-size:28px;margin-bottom:10px">🔗</div>
+        اربط مستودع GitHub<br>لعرض التوثيق هنا
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main">
+
+    <!-- Welcome -->
+    <div id="welcome-screen">
+      <div class="welcome-icon">📖</div>
+      <h1 class="welcome-title">مرحباً بك في مركز التوثيق</h1>
+      <p class="welcome-sub">
+        اربط مستودع GitHub الخاص بك وسيتم عرض ملفات التوثيق تلقائياً — بدون أي تعديل على الكود.
+      </p>
+      <div class="setup-card">
+        <h3>⚡ إعداد سريع — 3 خطوات فقط</h3>
+        <div class="setup-step">
+          <div class="step-num">1</div>
+          <div>أنشئ مستودعاً على GitHub وضع فيه ملفات <code style="background:var(--bg-base);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px">.md</code> داخل مجلد <code style="background:var(--bg-base);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px">docs/</code></div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">2</div>
+          <div>أضف ملف <code style="background:var(--bg-base);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:12px">sidebar.json</code> في جذر المستودع لتحديد ترتيب الصفحات</div>
+        </div>
+        <div class="setup-step">
+          <div class="step-num">3</div>
+          <div>اضغط "ربط GitHub" في الأعلى وأدخل اسم المستودع — الموقع يتحدث تلقائياً!</div>
+        </div>
+        <button class="setup-btn" onclick="openModal()">
+          🔗 ربط GitHub الآن
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-screen" style="display:none;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+      <div class="spinner"></div>
+      <span style="color:var(--text-muted);font-size:14px">جاري التحميل...</span>
+    </div>
+
+    <!-- Error -->
+    <div class="error-banner" id="error-banner"></div>
+
+    <!-- Doc View -->
+    <div id="doc-view">
+      <div class="doc-header">
+        <div class="doc-breadcrumb">
+          <span>التوثيق</span>
+          <span>›</span>
+          <span id="doc-section-name"></span>
+        </div>
+        <h1 class="doc-title" id="doc-title">—</h1>
+        <div class="doc-meta">
+          <span id="doc-repo-link"></span>
+          <span id="doc-last-updated"></span>
+        </div>
+      </div>
+      <div id="doc-body"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== CONFIG MODAL ===== -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <h2 class="modal-title">🔗 ربط مستودع GitHub</h2>
+    <p class="modal-sub">أدخل معلومات المستودع لجلب التوثيق تلقائياً</p>
+
+    <label class="field-label">اسم المستخدم / المؤسسة</label>
+    <input class="field-input" id="inp-owner" placeholder="مثال: octocat" />
+
+    <label class="field-label">اسم المستودع</label>
+    <input class="field-input" id="inp-repo" placeholder="مثال: my-docs" />
+
+    <label class="field-label">الفرع (Branch)</label>
+    <input class="field-input" id="inp-branch" placeholder="main" value="main" />
+
+    <label class="field-label">مجلد التوثيق</label>
+    <input class="field-input" id="inp-folder" placeholder="docs" value="docs" />
+
+    <label class="field-label">GitHub Token <span style="color:var(--text-muted);font-weight:400">(اختياري - للمستودعات الخاصة)</span></label>
+    <input class="field-input" id="inp-token" placeholder="ghp_xxxxxxxxxxxx" type="password" />
+    <p class="field-hint">للمستودعات العامة لا تحتاج Token. للخاصة أنشئ token من GitHub Settings → Developer settings.</p>
+
+    <label class="field-label">عنوان الموقع <span style="color:var(--text-muted);font-weight:400">(اختياري)</span></label>
+    <input class="field-input" id="inp-title" placeholder="مركز التوثيق" />
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="connectGitHub()">✓ ربط والتحميل</button>
+      <button class="btn-secondary" onclick="closeModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========================================
+   GitHub Docs Site — Core Logic
+======================================== */
+
+let CONFIG = JSON.parse(localStorage.getItem('gh_docs_config') || 'null');
+let SIDEBAR_DATA = [];
+let CURRENT_FILE = null;
+
+// ── On Load ──────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  hljs.configure({ ignoreUnescapedHTML: true });
+  if (CONFIG) loadFromConfig();
+});
+
+// ── Modal ────────────────────────────────
+function openModal() {
+  if (CONFIG) {
+    document.getElementById('inp-owner').value  = CONFIG.owner  || '';
+    document.getElementById('inp-repo').value   = CONFIG.repo   || '';
+    document.getElementById('inp-branch').value = CONFIG.branch || 'main';
+    document.getElementById('inp-folder').value = CONFIG.folder || 'docs';
+    document.getElementById('inp-token').value  = CONFIG.token  || '';
+    document.getElementById('inp-title').value  = CONFIG.title  || '';
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+// ── Connect ──────────────────────────────
+async function connectGitHub() {
+  const owner  = document.getElementById('inp-owner').value.trim();
+  const repo   = document.getElementById('inp-repo').value.trim();
+  const branch = document.getElementById('inp-branch').value.trim() || 'main';
+  const folder = document.getElementById('inp-folder').value.trim() || 'docs';
+  const token  = document.getElementById('inp-token').value.trim();
+  const title  = document.getElementById('inp-title').value.trim();
+
+  if (!owner || !repo) {
+    alert('الرجاء إدخال اسم المستخدم والمستودع');
+    return;
+  }
+
+  CONFIG = { owner, repo, branch, folder, token, title };
+  localStorage.setItem('gh_docs_config', JSON.stringify(CONFIG));
+  closeModal();
+  loadFromConfig();
+}
+
+// ── Load from config ─────────────────────
+async function loadFromConfig() {
+  if (CONFIG.title) {
+    document.getElementById('site-title').textContent = CONFIG.title;
+    document.title = CONFIG.title;
+  }
+  showLoading();
+  hideError();
+
+  try {
+    // Try sidebar.json first
+    const sidebarData = await tryFetchSidebar();
+    if (sidebarData) {
+      SIDEBAR_DATA = sidebarData;
+    } else {
+      // Auto-discover .md files
+      SIDEBAR_DATA = await discoverFiles();
+    }
+
+    if (!SIDEBAR_DATA.length) {
+      showError('لم يتم العثور على ملفات توثيق. تأكد من وجود ملفات .md في مجلد ' + CONFIG.folder);
+      hideLoading();
+      return;
+    }
+
+    renderSidebar();
+    updateStatusConnected();
+    hideLoading();
+
+    // Load first file
+    loadFile(SIDEBAR_DATA[0]);
+
+  } catch (e) {
+    hideLoading();
+    showError('خطأ في الاتصال بـ GitHub: ' + e.message + '. تأكد من صحة البيانات المدخلة.');
+  }
+}
+
+// ── Try fetch sidebar.json ────────────────
+async function tryFetchSidebar() {
+  try {
+    const url = rawUrl('sidebar.json');
+    const res = await ghFetch(url);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+// ── Auto-discover .md files ───────────────
+async function discoverFiles() {
+  const apiUrl = `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.folder}?ref=${CONFIG.branch}`;
+  const res = await ghFetch(apiUrl, true);
+
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('المستودع أو المجلد غير موجود');
+    if (res.status === 403) throw new Error('تجاوزت حد الطلبات أو المستودع خاص (أضف Token)');
+    throw new Error('HTTP ' + res.status);
+  }
+
+  const files = await res.json();
+  const mdFiles = files.filter(f => f.type === 'file' && f.name.endsWith('.md'));
+
+  return mdFiles.map(f => ({
+    title: f.name.replace('.md', '').replace(/-/g, ' '),
+    path:  CONFIG.folder + '/' + f.name,
+    icon:  '📄'
+  }));
+}
+
+// ── Render Sidebar ────────────────────────
+function renderSidebar() {
+  const el = document.getElementById('sidebar-content');
+
+  // Group by section if items have `section` property
+  const sections = {};
+  SIDEBAR_DATA.forEach(item => {
+    const sec = item.section || 'عام';
+    if (!sections[sec]) sections[sec] = [];
+    sections[sec].push(item);
+  });
+
+  let html = '';
+  Object.entries(sections).forEach(([sec, items]) => {
+    html += `<div class="sidebar-section">`;
+    html += `<div class="sidebar-section-title">${sec}</div>`;
+    items.forEach((item, idx) => {
+      const icon = item.icon || '📄';
+      html += `<div class="sidebar-item" data-path="${item.path}" onclick="loadFile(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+        <span class="item-icon">${icon}</span>
+        <span>${item.title}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+// ── Load File ─────────────────────────────
+async function loadFile(item) {
+  CURRENT_FILE = item;
+
+  // Update sidebar active
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.path === item.path);
+  });
+
+  showLoading();
+  hideError();
+  hideDocView();
+
+  try {
+    const url = rawUrl(item.path);
+    const res = await ghFetch(url);
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    const md = await res.text();
+    renderDoc(item, md);
+    hideLoading();
+    showDocView();
+
+  } catch (e) {
+    hideLoading();
+    showError('تعذّر تحميل الملف: ' + e.message);
+  }
+}
+
+// ── Render Doc ────────────────────────────
+function renderDoc(item, md) {
+  // Title from first H1 or item title
+  const h1Match = md.match(/^#\s+(.+)/m);
+  const title = h1Match ? h1Match[1] : item.title;
+
+  document.getElementById('doc-title').textContent = title;
+  document.getElementById('doc-section-name').textContent = item.section || item.title;
+
+  const ghLink = `https://github.com/${CONFIG.owner}/${CONFIG.repo}/blob/${CONFIG.branch}/${item.path}`;
+  document.getElementById('doc-repo-link').innerHTML =
+    `<a href="${ghLink}" target="_blank" rel="noopener">عرض على GitHub ↗</a>`;
+
+  // Render Markdown
+  const rawHtml = marked.parse(md);
+  const body = document.getElementById('doc-body');
+  body.innerHTML = rawHtml;
+
+  // Wrap all pre>code with custom header
+  body.querySelectorAll('pre').forEach(pre => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+
+    // Detect language
+    const classList = [...code.classList];
+    const langClass = classList.find(c => c.startsWith('language-'));
+    const lang = langClass ? langClass.replace('language-', '') : 'code';
+
+    // Create wrapper
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block-wrapper';
+
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+    header.innerHTML = `
+      <span class="code-lang">${lang}</span>
+      <button class="copy-btn" onclick="copyCode(this)">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/>
+          <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/>
+        </svg>
+        نسخ
+      </button>`;
+
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(header);
+    wrapper.appendChild(pre);
+    pre.style.margin = '0';
+    pre.style.borderRadius = '0 0 8px 8px';
+    pre.style.borderTop = 'none';
+
+    // Highlight
+    hljs.highlightElement(code);
+  });
+
+  // Highlight any remaining code blocks
+  body.querySelectorAll('pre code').forEach(block => {
+    if (!block.dataset.highlighted) hljs.highlightElement(block);
+  });
+}
+
+// ── Copy Code ─────────────────────────────
+async function copyCode(btn) {
+  const pre = btn.closest('.code-block-wrapper').querySelector('pre');
+  const text = pre.querySelector('code').innerText;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.classList.add('copied');
+    btn.querySelector('svg + *') ? null : null;
+    const span = btn.querySelector('svg').nextSibling;
+    const orig = btn.innerText.trim();
+    btn.innerHTML = btn.innerHTML.replace('نسخ', '✓ تم النسخ');
+    setTimeout(() => {
+      btn.innerHTML = btn.innerHTML.replace('✓ تم النسخ', 'نسخ');
+      btn.classList.remove('copied');
+    }, 2000);
+  } catch {}
+}
+
+// ── Helpers ───────────────────────────────
+function rawUrl(path) {
+  return `https://raw.githubusercontent.com/${CONFIG.owner}/${CONFIG.repo}/${CONFIG.branch}/${path}`;
+}
+
+async function ghFetch(url, isApi = false) {
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (CONFIG.token) headers['Authorization'] = 'token ' + CONFIG.token;
+  return fetch(url, { headers });
+}
+
+function showLoading() {
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loading-screen').style.display = 'none';
+}
+
+function showDocView() {
+  document.getElementById('doc-view').style.display = 'flex';
+  document.getElementById('doc-view').style.flexDirection = 'column';
+}
+
+function hideDocView() {
+  document.getElementById('doc-view').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.textContent = '⚠ ' + msg;
+  el.style.display = 'block';
+  document.getElementById('welcome-screen').style.display = 'flex';
+}
+
+function hideError() {
+  document.getElementById('error-banner').style.display = 'none';
+}
+
+function updateStatusConnected() {
+  document.getElementById('status-dot').classList.add('connected');
+  document.getElementById('config-btn-text').textContent =
+    CONFIG.owner + '/' + CONFIG.repo;
+}
+</script>
+</body>
+</html>
